@@ -1,0 +1,4 @@
+npm install -g @railway/cli
+railway login
+railway init
+railway up
