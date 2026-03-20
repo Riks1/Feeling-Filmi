@@ -528,8 +528,9 @@ def not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return render_template('500.html'), 500
+  
+with app.app_context():
+    init_db()
 
 if __name__ == '__main__':
-    with app.app_context():
-        init_db()
-    app.run(port=5000, use_reloader=False)
+    app.run(debug=False,port=5000, use_reloader=False)
