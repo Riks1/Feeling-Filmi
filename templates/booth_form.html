@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{% if action == 'create' %}New Booth{% else %}Join Booth{% endif %} — FILMI{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <a href="{{ url_for('booths') }}" class="back-link">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Booths
+    </a>
+
+    {% if action == 'create' %}
+      <h1 class="auth-title">New Booth</h1>
+      <p class="auth-sub">Give your booth a name. A unique join code is generated automatically.</p>
+      <form method="POST" class="auth-form">
+        <div class="field">
+          <label class="field-label" for="name">Booth Name</label>
+          <input class="input" type="text" id="name" name="name"
+                 placeholder="Goa Trip 2025 ✨" maxlength="60" required autofocus />
+        </div>
+        <button type="submit" class="btn btn-gold btn-block">Create Booth</button>
+      </form>
+    {% else %}
+      <h1 class="auth-title">Join a Booth</h1>
+      <p class="auth-sub">Enter the 6-character code shared by your friend.</p>
+      <form method="POST" class="auth-form">
+        <div class="field">
+          <label class="field-label" for="code">Booth Code</label>
+          <input class="input input-code" type="text" id="code" name="code"
+                 placeholder="ABC123" maxlength="6" required autofocus
+                 style="text-transform:uppercase;letter-spacing:0.2em;text-align:center" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Join Booth</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

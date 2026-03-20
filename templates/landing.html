@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}FILMI — Your Private Photo Booth{% endblock %}
+
+{% block content %}
+<div class="landing">
+  <div class="landing-eyebrow">Your private photo world</div>
+  <h1 class="landing-title">
+    <span class="line1">Snap. Share.</span>
+    <span class="line2">Stay Filmi.</span>
+  </h1>
+  <p class="landing-sub">
+    Create private photo booths with your people.
+    Every photo is encrypted — even we can't see them.
+  </p>
+  <div class="landing-actions">
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Create a Booth</a>
+    <a href="{{ url_for('login') }}"    class="btn btn-secondary btn-lg">Sign in</a>
+  </div>
+  <div class="landing-pills">
+    <span class="pill pill-pink">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="3" y="8" width="10" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8V5.5a3 3 0 0 1 6 0V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      End-to-end encrypted
+    </span>
+    <span class="pill pill-cyan">Private booths</span>
+    <span class="pill pill-gold">Shared via code</span>
+  </div>
+</div>
+{% endblock %}

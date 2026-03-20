@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}{{ booth.name }} — FILMI{% endblock %}
+
+{% block content %}
+<div class="page">
+  <a href="{{ url_for('booths') }}" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    All Booths
+  </a>
+
+  <!-- Hero -->
+  <div class="booth-hero">
+    <div class="hero-orb-pink"></div>
+    <div class="hero-orb-gold"></div>
+    <div class="booth-hero-top">
+      <h1 class="booth-hero-name">{{ booth.name }}</h1>
+      <div class="booth-code-block">
+        <span class="booth-code-label">Invite Code</span>
+        <span class="booth-code-value">{{ booth.code }}</span>
+      </div>
+    </div>
+    <div class="booth-hero-stats">
+      <div class="stat"><strong>{{ photos | length }}</strong><span>Photos</span></div>
+      <div class="stat"><strong>{{ member_count }}</strong><span>Members</span></div>
+      <div class="stat"><strong>@{{ booth.creator }}</strong><span>Created by</span></div>
+    </div>
+    <div class="members-row">
+      {% for m in members %}
+        <div class="member-avatar" title="@{{ m.username }}">{{ m.username[0].upper() }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="booth-columns">
+    <!-- Left: feed -->
+    <div class="booth-main">
+      <div class="e2e-banner">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="8" width="10" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 8V5.5a3 3 0 0 1 6 0V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Photos are encrypted in your browser. The server can't see them.
+      </div>
+
+      <!-- Upload -->
+      <form id="upload-form" method="POST" action="{{ url_for('upload_photo', booth_id=booth.id) }}"
+            enctype="multipart/form-data" class="upload-form" data-booth-code="{{ booth.code }}">
+        <input type="hidden" name="iv" id="iv-field" />
+        <label class="upload-zone" id="upload-zone">
+          <div class="upload-icon">📸</div>
+          <p><span>Click to upload</span> or drag &amp; drop</p>
+          <small>Encrypted in your browser before upload</small>
+          <input type="file" name="file" id="file-input" accept="image/*" required />
+        </label>
+        <div id="upload-preview" class="upload-preview">
+          <img id="preview-img" src="" alt="preview" />
+          <div style="flex:1;display:flex;flex-direction:column;gap:0.5rem">
+            <input class="input" type="text" name="caption" placeholder="Add a caption… (optional)" maxlength="200" />
+            <label class="cover-check">
+              <input type="checkbox" name="set_cover" value="1" />
+              <span>Set as booth cover photo</span>
+            </label>
+            <div id="upload-status" class="upload-status">Ready — click Upload to encrypt &amp; send</div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="upload-btn" style="display:none;margin-top:0.75rem">Upload Photo</button>
+      </form>
+
+      {% if photos %}
+        <div class="section-label">Photos</div>
+        <div class="photos-feed">
+          {% for item in photos %}
+          {% set p = item.photo %}
+          {% set comments = item.comments %}
+          {% set reactions = item.reactions %}
+          {% set my_reaction = item.my_reaction %}
+          <div class="photo-post" id="photo-{{ p.id }}">
+
+            <div class="photo-post-img-wrap">
+              <img class="photo-post-img encrypted-photo"
+                   data-src="{{ url_for('uploaded_file', filename=p.filename) }}"
+                   data-iv="{{ p.iv }}"
+                   data-booth-code="{{ booth_code }}"
+                   alt="" />
+              <div class="photo-post-loading"><div class="post-spin"></div></div>
+
+              {% if is_creator %}
+              <form method="POST" action="{{ url_for('set_cover', booth_id=booth.id, photo_id=p.id) }}" class="set-cover-form">
+                <button type="submit" class="set-cover-btn" title="Set as cover">⭐ Set Cover</button>
+              </form>
+              {% endif %}
+            </div>
+
+            <div class="photo-post-body">
+              <div class="photo-post-header">
+                <div class="photo-post-avatar">{{ p.uploader[0].upper() }}</div>
+                <div>
+                  <div class="photo-post-user">@{{ p.uploader }}</div>
+                  <div class="photo-post-time">{{ p.uploaded_at[:10] }}</div>
+                </div>
+                <div class="photo-post-actions">
+                  <form method="POST" action="{{ url_for('like_photo', photo_id=p.id) }}">
+                    <button type="submit" class="action-btn {% if p.liked %}liked{% endif %}">
+                      {% if p.liked %}<svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z" fill="currentColor"/></svg>{% else %}<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 4-6.5 8-6.5 8z" stroke="currentColor" stroke-width="1.4"/></svg>{% endif %}
+                      {{ p.like_count }}
+                    </button>
+                  </form>
+                  <form method="POST" action="{{ url_for('save_photo', photo_id=p.id) }}">
+                    <button type="submit" class="action-btn {% if p.saved %}saved{% endif %}">
+                      {% if p.saved %}<svg width="13" height="13" viewBox="0 0 16 16"><path d="M4 2h8a1 1 0 0 1 1 1v10l-5-3-5 3V3a1 1 0 0 1 1-1z" fill="currentColor"/></svg>{% else %}<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 2h8a1 1 0 0 1 1 1v10l-5-3-5 3V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4"/></svg>{% endif %}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {% if p.caption %}<div class="photo-caption">{{ p.caption }}</div>{% endif %}
+
+              <!-- Reactions -->
+              <div class="reactions-row">
+                {% for r in reactions %}
+                  <form method="POST" action="{{ url_for('react_photo', photo_id=p.id) }}" style="display:inline">
+                    <input type="hidden" name="emoji" value="{{ r.emoji }}" />
+                    <button type="submit" class="reaction-pill {% if r.emoji == my_reaction %}mine{% endif %}">
+                      {{ r.emoji }} <span>{{ r.count }}</span>
+                    </button>
+                  </form>
+                {% endfor %}
+                <!-- Reaction picker -->
+                <div class="reaction-picker-wrap">
+                  <button type="button" class="reaction-add-btn" onclick="this.nextElementSibling.classList.toggle('open')">＋</button>
+                  <div class="reaction-picker">
+                    {% for emoji in REACTIONS %}
+                      {% if emoji != my_reaction %}
+                      <form method="POST" action="{{ url_for('react_photo', photo_id=p.id) }}">
+                        <input type="hidden" name="emoji" value="{{ emoji }}" />
+                        <button type="submit" class="reaction-option">{{ emoji }}</button>
+                      </form>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comments -->
+              {% if comments %}
+              <div class="comments-list">
+                {% for c in comments %}
+                <div class="comment">
+                  <span class="comment-user">@{{ c.username }}</span>
+                  <span class="comment-text">{{ c.text }}</span>
+                  {% if c.user_id == current_user_id %}
+                  <form method="POST" action="{{ url_for('delete_comment', comment_id=c.id) }}" style="display:inline;margin-left:auto">
+                    <button type="submit" class="comment-delete">✕</button>
+                  </form>
+                  {% endif %}
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <form method="POST" action="{{ url_for('add_comment', photo_id=p.id) }}" class="comment-form">
+                <input class="comment-input" type="text" name="text" placeholder="Add a comment…" maxlength="300" required />
+                <button type="submit" class="comment-submit">Post</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">🎞️</div>
+          <p>No photos yet.<br><em>Upload the first one!</em></p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Activity feed -->
+    <div class="booth-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-title">✦ Activity</div>
+        {% if activity %}
+        <div class="activity-list">
+          {% for a in activity %}
+          <div class="activity-item">
+            <div class="activity-avatar">{{ a.username[0].upper() }}</div>
+            <div class="activity-body">
+              <span class="activity-detail">{{ a.detail }}</span>
+              <span class="activity-time">{{ a.created_at[5:16].replace('T', ' at ') }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+          <p class="sidebar-empty">No activity yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="made-by">made with ♥ by Haarika</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/crypto.js') }}"></script>
+<script src="{{ url_for('static', filename='js/booth.js') }}"></script>
+{% endblock %}

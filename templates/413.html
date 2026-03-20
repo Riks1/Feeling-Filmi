@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}File Too Large — FILMI{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div class="error-bg-text">413</div>
+  <div class="error-content">
+    <div class="error-emoji">📸</div>
+    <h1 class="error-title">Too <em>Filmi</em></h1>
+    <p class="error-sub">That photo is too large, bestie. Max size is 20MB.</p>
+    <a href="javascript:history.back()" class="btn btn-primary">← Go back</a>
+  </div>
+</div>
+{% endblock %}

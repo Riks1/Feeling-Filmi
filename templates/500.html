@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Something Went Wrong — FILMI{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div class="error-bg-text">500</div>
+  <div class="error-content">
+    <div class="error-emoji">💀</div>
+    <h1 class="error-title">Cut! <em>Take Two.</em></h1>
+    <p class="error-sub">Something broke on our end. Try again in a moment.</p>
+    <a href="{{ url_for('landing') }}" class="btn btn-primary">Back to FILMI</a>
+  </div>
+</div>
+{% endblock %}

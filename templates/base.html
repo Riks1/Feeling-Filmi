@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}FILMI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <!-- Grain texture -->
+  <div class="grain"></div>
+
+  <!-- Animated border frame -->
+  <div class="frame-top"></div>
+  <div class="frame-bottom"></div>
+  <div class="frame-left"></div>
+  <div class="frame-right"></div>
+  <div class="frame-corner corner-tl"></div>
+  <div class="frame-corner corner-tr"></div>
+  <div class="frame-corner corner-bl"></div>
+  <div class="frame-corner corner-br"></div>
+
+  <nav class="nav">
+    <a href="{{ url_for('landing') }}" class="nav-logo">FILMI</a>
+    <div class="nav-right">
+      {% if current_user() %}
+        <span class="nav-user">@{{ current_user().username }}</span>
+        <a href="{{ url_for('booths') }}" class="nav-link {% if request.endpoint == 'booths' %}active{% endif %}">Booths</a>
+        <a href="{{ url_for('gallery') }}" class="nav-link {% if request.endpoint == 'gallery' %}active{% endif %}">Gallery</a>
+        <form method="POST" action="{{ url_for('logout') }}" style="display:inline">
+          <button class="btn btn-ghost btn-sm" type="submit">Sign out</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('login') }}"    class="btn btn-secondary btn-sm">Sign in</a>
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Join</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
